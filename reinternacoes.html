@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Indicador — Taxa de Reinternação</title>
+<style>
+  :root{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  body{margin:0;padding:14px;background:#f6f7fb;color:#222;}
+  .card{max-width:880px;background:#fff;border-radius:10px;box-shadow:0 6px 18px rgba(30,40,60,0.08);padding:18px;}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  h1{font-size:18px;margin:0;color:#8b2fbf}
+  .subtitle{font-size:12px;color:#666;margin-top:6px}
+  .section{margin-top:12px;padding-top:8px;border-top:1px dashed #eee}
+  pre.code{background:#0f1724;color:#e6eef8;padding:12px;border-radius:6px;overflow:auto;font-size:13px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap}
+  .badge{padding:6px 8px;border-radius:8px;font-size:12px;background:#f1f4fb;color:#1b3a8a}
+  .faixa{display:flex;gap:10px;align-items:center;margin:6px 0}
+  .dot{width:12px;height:12px;border-radius:50%}
+  .dot.green{background:#16a34a}.dot.yellow{background:#f59e0b}.dot.red{background:#ef4444}
+  .actions{display:flex;gap:10px;margin-top:12px}
+  button{cursor:pointer;border:0;padding:8px 12px;border-radius:8px;font-weight:600}
+  .btn-primary{background:#7c3aed;color:white}
+  .btn-outline{background:transparent;border:1px solid #ddd}
+  .small{font-size:13px;color:#444}
+  details{margin-top:8px}
+  a.link{color:#7c3aed;text-decoration:none;font-weight:600}
+  @media (max-width:520px){.card{padding:12px}}
+</style>
+</head>
+<body>
+  <div class="card" role="region" aria-label="Descrição do indicador">
+    <div class="top">
+      <div>
+        <h1>📊 Taxa de Reinternação (30 dias)</h1>
+        <div class="subtitle">Indicador para auditoria — rotina de qualidade</div>
+      </div>
+      <div class="badges">
+        <div class="badge">Atualizado: <span id="data-atualizacao">2025-08-08</span></div>
+        <div class="badge">Responsável: Analytics</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="small"><strong>Definição</strong></div>
+      <div class="small" style="margin-top:6px">
+        Percentual de pacientes que retornaram para internação dentro de <strong>30 dias</strong> da data de alta.
+      </div>
+
+      <div style="margin-top:12px" class="small"><strong>Fórmula</strong></div>
+      <pre class="code">
+(Nº de reinternações no período ÷ Nº total de internações no período) × 100
+      </pre>
+
+      <div style="margin-top:10px" class="small"><strong>Interpretação</strong></div>
+      <div style="margin-top:8px">
+        <div class="faixa"><div class="dot green"></div><div>0% — 10%: Excelente</div></div>
+        <div class="faixa"><div class="dot yellow"></div><div>11% — 20%: Atenção</div></div>
+        <div class="faixa"><div class="dot red"></div><div>&gt;20%: Crítico</div></div>
+      </div>
+
+      <div class="section">
+        <div class="small"><strong>Metodologia / Regras de Identificação</strong></div>
+        <ol class="small" style="margin-top:8px; padding-left:18px">
+          <li>Desconsiderar guias cuja primeira/segunda internação tenha regime "2 - Hospital Dia" ou "3 - Domiciliar".</li>
+          <li>Desconsiderar guias cuja primeira/segunda internação envolva prestadores "de capa" listados na regra 11 (códigos: 703, 943, 1051).</li>
+          <li>Desconsiderar guias em que a data de atendimento esteja entre a data de alta da guia anterior e a data de atendimento da próxima guia.</li>
+          <li>A diferença entre as guias é calculada como:  
+              <em>Dt_atend atual – Dt_alta da guia anterior</em>.  
+              Se essa diferença for igual ou superior a 2 dias, considera-se uma nova internação ou reinternação.
+          </li>
+          <li>Considerar apenas guias do tipo "Internação", que estejam integradas.</li>
+        </ol>
+      </div>
+
+      <div class="actions">
+        <button class="btn-outline" id="toggle-more">Mostrar detalhes técnicos</button>
+      </div>
+
+      <details id="detalhes" style="margin-top:10px">
+        <summary style="cursor:pointer;font-weight:600">Detalhes técnicos</summary>
+        <div style="margin-top:8px" class="small">
+          <p><strong>SQL (exemplo)</strong></p>
+          <pre class="code">
+SELECT COUNT(*) reinternacoes
+FROM   MV_GD_INTERNACAO_REINTERNACAO_BASE t
+WHERE  t.dt_reinternacao BETWEEN t.dt_alta AND t.dt_alta + 30
+          </pre>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+<script>
+  document.getElementById('toggle-more').addEventListener('click', function(){
+    const det = document.getElementById('detalhes');
+    det.open = !det.open;
+    this.textContent = det.open ? "Esconder detalhes técnicos" : "Mostrar detalhes técnicos";
+  });
+</script>
+</body>
+</html>
